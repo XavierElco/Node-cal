@@ -5,7 +5,20 @@ ls = readline.createInterface({
     output: process.stdout
 });
 
-const cal = () => {
+const calResult = (operator, a, b) => {
+    switch(operator) {
+        case "+":
+            return a+b;
+         case "-":
+            return a-b;
+        case "*":
+            return a*b;
+        case "/":
+            return a/b;
+    }
+}
+
+const cal = (answer) => {
     // 1. Get all numbers and operators, tokens = ['1', '+', '1']
     // 2. Create a object that tell what the order is for the operators {'+': 1, '-': 1", '*': 2}
     // 3. Create a array for numbers
@@ -32,6 +45,42 @@ const cal = () => {
 
     const operators = [];
     const operands = [];
+    const precedence = {
+        "+": 1,
+        "-": 1,
+        "*": 2,
+        "/": 2,
+    };
+    const tokens = answer.match(/\+|\S/g);
+
+    for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i]
+        const isNumber = !isNaN(parseInt(token))
+        if (isNumber) {
+            operands.push(parseInt(token));
+        }else{
+            const hasHigherPrecedence = 
+                precedence[operators[operators.length - 1]] > precedence[token];
+            while(operators.length && hasHigherPrecedence) {
+                const a = operands.pop();
+                const b = operands.pop();
+                const operator = operators.pop();
+                const result = calResult(operator, a, b);
+                operands.push(result);
+            }
+            operators.push(token)
+        }
+    }
+
+    while(operators.length > 0) {
+        const a = operands.pop()
+        const b = operands.pop()
+        const operator = operators.pop()
+        const result = calResult(operator, a, b)
+        operands.push(result)
+    }
+
+    return operands.pop()
 }
 
 
@@ -47,7 +96,7 @@ const askQuestion = () => {
 
         const result = cal(answer);
 
-        console.log(answer);
+        console.log(result);
         askQuestion();
     }
         
